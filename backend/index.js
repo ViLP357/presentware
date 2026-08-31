@@ -1,46 +1,47 @@
+require('dotenv').config()
 const express = require('express')
+const Project = require('./models/project')
 const app = express()
-app.use(express.json())
 
-let projects = [
-  {
-    id: "1",
-    title: "TEst prjects",
-    creator: "Tester",
-    link: "none",
-    type: "software"
-  },  {
-    id: "2",
-    title: "TEst prject2",
-    creator: "Tester2",
-    link: "none",
-    type: "software"
-  },
-    {
-    id: "3",
-    title: "TEst prject3",
-    creator: "Tester3",
-    link: "hello",
-    type: "hardware"
-  },
-]
+
+
+const logger = require('./utils/logger')
+const config = require('./utils/config')
+
+
+logger.info(`Server running on port ${config.PORT}`)
+
+const requestLogger = (request, response, next) => {
+  console.log('Method:', request.method)
+  console.log('Path:  ', request.path)
+  console.log('Body:  ', request.body)
+  console.log('---')
+  next()
+}
+
+
+app.use(express.json())
+app.use(requestLogger)
+
+
+
+let projects = []
+let users = []
 
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
 
 app.get('/api/projects', (request, response) => {
-  response.json(projects)
+  Project.find({}).then(projects=> {
+    response.json(projects)
+  })
 })
 
 app.get('/api/projects/:id', (request, response) => {
-    const id = request.params.id;
-    const project = projects.find(p => p.id === id) 
-    if (project) {
-        response.json(project)
-    } else {
-        response.status(404).end()
-    }
+    Project.findById(request.params.id).then((project) => {
+      response.json(project)
+    })
 })
 
 app.delete('/api/projects/:id', (request, response) => {
@@ -49,15 +50,8 @@ app.delete('/api/projects/:id', (request, response) => {
 
   response.status(204).end()
 })
-const generateId = () => {
-  const maxId = projects.length > 0
-    ? Math.max(...projects.map(p => Number(p.id)))
-    : 0
-  return String(maxId + 1)
-}
 
 app.post('/api/projects', (request, response) => {
-
     const body = request.body
 
   if (!body.title) {
@@ -65,20 +59,22 @@ app.post('/api/projects', (request, response) => {
       error: 'content missing' 
     })
   }
-
-    const project = {
-    id: generateId(),
-    title:body.title,
-    creator: body.creator,
-    link: body.link,
-    type: body.type
-  }
-    console.log(project)
-
-    projects = projects.concat(project)
-    response.json(project)
+  const project = new Project({
+    title: body.title,
+  })
+  project.save().then((savedProject)=> {
+    response.json(savedProject)
+  })
 })
 
+app.get('/api/users', (request, response) => {
+  response.json(users)
+})
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({error: 'unknown endpoint'})
+}
+app.use(unknownEndpoint)
 const PORT = 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
