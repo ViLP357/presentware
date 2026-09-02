@@ -16,15 +16,12 @@ mongoose.connect(url, { family: 4 })
     console.log('error connecting to MongoDB:', error.message)
   })
 
-const projectSchema = new mongoose.Schema({
-  title: String,
-  creator: String,
-  link: String,
-  type: String,
-  description: String
+const userSchema = new mongoose.Schema({
+  username: String,
+  password: String
 })
 
-projectSchema.set('toJSON', {
+userSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString()
     delete returnedObject._id
@@ -32,4 +29,4 @@ projectSchema.set('toJSON', {
   }
 })
 
-module.exports = mongoose.model('Project', projectSchema)
+module.exports = mongoose.model('User', userSchema)
