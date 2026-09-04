@@ -1,5 +1,6 @@
 const projectsRouter = require('express').Router()
 const Project = require('../models/project')
+const User = require('../models/user')
 
 projectsRouter.get('/', (request, response) => {
   Project.find({}).then(projects=> {
@@ -36,23 +37,35 @@ projectsRouter.put('/:id', (request, response,next)=> {
   .catch(error=>next(error))
 })
 
-projectsRouter.post('/', (request, response) => {
-    const body = request.body
+projectsRouter.post('/', async(request, response, next) => {
+  const body = request.body
 
+  const user = await User.findById(body.userId)
+
+  if (!user) {
+    return response.status(400).json({error: 'userId missing or not valid'})
+  }
   if (!body.title) {
-    return response.status(400).json({ 
-      error: 'content missing' 
+    return response.status(400).json({
+      error: 'content missing'
     })
   }
+  
   const project = new Project({
     title: body.title,
-    creator: body.creator,
+    creator: user._id, //body.creator,
     link: body.link,
     type: body.type,
-    description: body.description
+    content: body.content || body.description,
+    image: body.image,
+    used_time: Number(body.used_time) || 0,
+    ai_usage: Number(body.ai_usage) || 0,
+    tags: body.tags || [],
+    links: body.links || []
   })
-  project.save().then((savedProject)=> {
-    response.json(savedProject)
-  })
+
+  const savedProject = await project.save()
+  user.projects = user.projects.concat(savedProject._id)
+  await user.save()
 })
 module.exports = projectsRouter

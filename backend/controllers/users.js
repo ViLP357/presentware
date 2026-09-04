@@ -1,4 +1,5 @@
 
+const bcrypt = require('bcrypt')
 const usersRouter = require('express').Router()
 const User = require('../models/user')
 
@@ -14,25 +15,34 @@ usersRouter.get('/:id', (request, response, next)=> {
   .catch(error=>next(error))
 })
 
-usersRouter.get('/:id', (request, response) => {
+usersRouter.delete('/:id', (request, response, next) => {
   User.findByIdAndDelete(request.params.id)
-  .then(result=>{response.status(204).end()})
+    .then(() => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
-usersRouter.post('/', (request, response) => {
-  const body = request.body
-  if (!body.username ||!body.password) {
-    return response.status(400).json({ 
-      error: 'Username or password missing' 
+usersRouter.post('/', async (request, response) => {
+  const { username, password, country } = request.body
+
+  if (!username || !password) {
+    return response.status(400).json({
+      error: 'Username or password missing'
     })
   }
+
+  const saltRounds = 10
+  const passwordHash = await bcrypt.hash(password, saltRounds)
+
   const user = new User({
-    username: body.username,
-    password: body.password
+    username,
+    passwordHash,
+    country
   })
-  user.save().then((savedUser)=> {
-    response.json(savedUser)
-  })
+
+  const savedUser = await user.save()
+  response.status(201).json(savedUser)
 })
 usersRouter.put('/:id', (request, response,next)=> {
   const {username} = request.body

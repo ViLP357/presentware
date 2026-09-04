@@ -17,11 +17,25 @@ mongoose.connect(url, { family: 4 })
   })
 
 const projectSchema = new mongoose.Schema({
-  title: String,
+  title: { type: String, required: true },
   creator: String,
   link: String,
   type: String,
-  description: String
+  content: String,
+  image: String,
+  created_at: { type: Date, default: Date.now },
+  used_time: { type: Number, default: 0 },
+  ai_usage: { type: Number, default: 0 },
+  contributors: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  tags: [{
+    type: String
+  }],
+  links: [{
+    type: String
+  }]
 })
 
 projectSchema.set('toJSON', {

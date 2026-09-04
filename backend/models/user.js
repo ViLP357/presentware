@@ -17,8 +17,17 @@ mongoose.connect(url, { family: 4 })
   })
 
 const userSchema = new mongoose.Schema({
-  username: String,
-  password: String
+  username: { type: String, required: true, unique: true },
+  passwordHash: { type: String, required: true },
+  role: String,
+  country: String,
+  projects: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Project'
+  }],
+  links: [{
+    type: String
+  }]
 })
 
 userSchema.set('toJSON', {
@@ -26,6 +35,7 @@ userSchema.set('toJSON', {
     returnedObject.id = returnedObject._id.toString()
     delete returnedObject._id
     delete returnedObject.__v
+    delete returnedObject.passwordHash
   }
 })
 
