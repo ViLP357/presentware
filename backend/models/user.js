@@ -19,7 +19,7 @@ mongoose.connect(url, { family: 4 })
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   passwordHash: { type: String, required: true },
-  role: String,
+  role: {type: String, default: "normal"},
   country: String,
   projects: [{
     type: mongoose.Schema.Types.ObjectId,

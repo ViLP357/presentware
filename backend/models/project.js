@@ -20,7 +20,7 @@ const projectSchema = new mongoose.Schema({
   title: { type: String, required: true },
   creator: String,
   link: String,
-  type: String,
+  type: {type: String, default: "None"},
   content: String,
   image: String,
   created_at: { type: Date, default: Date.now },
