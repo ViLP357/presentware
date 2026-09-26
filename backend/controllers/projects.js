@@ -69,7 +69,7 @@ projectsRouter.post('/', async(request, response, next) => {
     creator: user._id, //body.creator,
     link: body.link,
     type: body.type,
-    content: body.content || body.description,
+    content: body.content,
     image: body.image,
     used_time: Number(body.used_time) || 0,
     ai_usage: Number(body.ai_usage) || 0,
@@ -80,5 +80,7 @@ projectsRouter.post('/', async(request, response, next) => {
   const savedProject = await project.save()
   user.projects = user.projects.concat(savedProject._id)
   await user.save()
+
+  response.status(200).send(savedProject)
 })
 module.exports = projectsRouter
