@@ -1,6 +1,8 @@
 import Projects from "./Projects"
 
+
 const WelcomePage = ()=>  {
+ 
     return (
         <div>
             <p>Home</p>

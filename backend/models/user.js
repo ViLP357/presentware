@@ -25,9 +25,10 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Project'
   }],
-  links: [{
-    type: String
-  }]
+  links: {
+    type: mongoose.Schema.Types.Mixed,
+    default: () => ({})
+  }
 })
 
 userSchema.set('toJSON', {
