@@ -19,13 +19,11 @@ const Projects = () => {
         <div>
             <h1>List of projects</h1>
             {errorMessage && <p>{errorMessage}</p>}
-            <ul>
+            <div className="projectGrid">
                 {projects.map(project => (
-                    <li key={project.id}>
-                        <ProjectCard project={project} />
-                    </li>
+                    <ProjectCard key={project.id} project={project} />
                 ))}
-            </ul>
+            </div>
         </div>
     )
 }

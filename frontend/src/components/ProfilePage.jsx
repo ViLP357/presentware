@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import loginService from '../services/login'
 import userService from '../services/users'
+import ProjectForm from './ProjectForm'
 
 const getLinkHref = link => {
   const trimmedLink = link.trim()
@@ -26,6 +27,7 @@ const ProfilePage = ({ user, onUserUpdate }) => {
   const [successMessage, setSuccessMessage] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
 
   if (!user) {
     return (
@@ -105,10 +107,23 @@ const ProfilePage = ({ user, onUserUpdate }) => {
     }
   }
 
+  const handleProjectCreated = createdProject => {
+    const projects = user.projects || []
+    const updatedProjects = projects.some(project =>
+      (typeof project === 'string' ? project : project.id) === createdProject.id
+    )
+      ? projects
+      : [...projects, createdProject.id]
+
+    onUserUpdate(loginService.updateLoggedInUser({ projects: updatedProjects }))
+  }
+  console.log(user.projects)
   return (
     <div>
       <h2>Profile</h2>
       <dl>
+        <button onClick={() => setIsCreating(!isCreating)}>Create a new project</button>
+        {isCreating && <ProjectForm onProjectCreated={handleProjectCreated} />}
         <dt>Käyttäjätunnus</dt>
         <dd>{user.username}</dd>
         <dt>Rooli</dt>
@@ -123,6 +138,9 @@ const ProfilePage = ({ user, onUserUpdate }) => {
           <>
             <dt>Projektit</dt>
             <dd>{user.projects.length}</dd>
+                <ul>
+                {user.projects.map((project) => <li>{project}</li>)}
+              </ul>
           </>
         )}
       </dl>
