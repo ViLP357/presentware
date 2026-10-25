@@ -36,18 +36,18 @@ const SignInPage = ({ user, onLogin }) => {
   if (user) {
     return (
       <div>
-        <h2>Olet jo kirjautunut sisään</h2>
-        <Link to="/home">Jatka Home-sivulle</Link>
+        <h2>You are alreasy logged in</h2>
+        <Link to="/home">Continue to Home-page</Link>
       </div>
     )
   }
 
   return (
     <div>
-      <h2>Luo käyttäjätunnus</h2>
+      <h2>Create a user</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="new-username">Käyttäjätunnus</label>
+          <label htmlFor="new-username">Username</label>
           <input
             id="new-username"
             autoComplete="username"
@@ -57,7 +57,7 @@ const SignInPage = ({ user, onLogin }) => {
           />
         </div>
         <div>
-          <label htmlFor="new-password">Salasana</label>
+          <label htmlFor="new-password">Password</label>
           <input
             id="new-password"
             type="password"
@@ -68,12 +68,12 @@ const SignInPage = ({ user, onLogin }) => {
           />
         </div>
         <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Luodaan tunnusta...' : 'Luo tunnus'}
+          {isSubmitting ? ' Creating an account...' : 'Create an account'}
         </button>
       </form>
       {errorMessage && <p role="alert">{errorMessage}</p>}
       <p>
-        Onko sinulla jo tunnus? <Link to="/">Kirjaudu sisään</Link>
+        Do you have an account? <Link to="/">Sign in</Link>
       </p>
     </div>
   )
