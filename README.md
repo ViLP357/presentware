@@ -1,14 +1,26 @@
 # presentware
 ### A website for showcasing both hardware and software projects.
+It's a combination of Github, Stardance feed and other project showcasing platforms.
 
-## Deploying to Vercel
+### Features
+- Create an user and sign in
+  Create your own account or use
+  username: test_account
+  password: tester1
+- Explore projects created by other builders
+- Add your own projects to presentware and let other people see them.
+  (I'd be very grateful if you added your stardance project to presentware so I can get real data)
 
-The repository is configured as a Vercel project with two services:
+### Plans for the future
+- Add more information to a project: pictures, links and tags
+- Project search: find projects by name, tag, user and country
+- Project collaboration. Backend supports this already, but it's not possible in frontend yet.
 
-- `frontend` serves the Vite app on all paths except `/api`.
-- `backend` serves the Express API on `/api/*`.
+### How to run it locally?
+- Clone this repository
+  The repository contains both backend and frontend in separated folders. You need to run these commands in both folders in order to start the website in a developer mode.
+```bash
+npm install
+npm run dev
 
-Configure `MONGODB_URI` and `SECRET` as environment variables for the backend
-service in Vercel. The frontend calls the API through the same-domain `/api`
-path, so no service binding is needed. For local Vite development, `/api`
-requests are proxied to the backend at `http://localhost:3001`.
+```
