@@ -1,7 +1,7 @@
 import axios from 'axios'
 import loginService from './login'
 
-const baseUrl = 'http://localhost:3001/api/users'
+const baseUrl = '/api/users'
 
 const getAll = async () => {
   const response = await axios.get(baseUrl)

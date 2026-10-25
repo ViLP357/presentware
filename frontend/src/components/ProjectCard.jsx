@@ -1,6 +1,6 @@
 import '../index.css'
 
-const ProjectCard = ({project}) => {
+const ProjectCard = ({project, setOpenProject}) => {
     let color
 
     switch (project.type) {
@@ -27,6 +27,7 @@ const ProjectCard = ({project}) => {
         <div className="projectCard" style={{'--category-color': color}}>
         <h3>{project.title}</h3>
         <p>{project.content}</p>
+        <button onClick={()=> setOpenProject(project)}>open</button>
         </div>
     )
 }

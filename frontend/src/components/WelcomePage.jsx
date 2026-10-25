@@ -42,8 +42,8 @@ const WelcomePage = ({ user, onLogin }) => {
       <h2>Welcome</h2>
       {user ? (
         <p>
-          Olet kirjautunut käyttäjänä {user.username}.{' '}
-          <Link to="/profile">Katso profiilisi</Link>
+          Logged in as {user.username}.{' '}
+          <Link to="/profile">Your profile</Link>
         </p>
       ) : (
         <LoginForm

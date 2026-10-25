@@ -5,7 +5,7 @@ const WelcomePage = ()=>  {
  
     return (
         <div>
-            <p>Home</p>
+            <h2>Home</h2>
             <Projects/>
         </div>
     )

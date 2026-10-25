@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import loginService from '../services/login'
 import userService from '../services/users'
@@ -28,6 +28,36 @@ const ProfilePage = ({ user, onUserUpdate }) => {
   const [isSaving, setIsSaving] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
+  const [profileProjects, setProfileProjects] = useState(user?.projects || [])
+  const [projectsError, setProjectsError] = useState('')
+
+  useEffect(() => {
+    if (!user?.id) {
+      setProfileProjects([])
+      return undefined
+    }
+
+    let isCurrent = true
+    setProfileProjects(user.projects || [])
+    setProjectsError('')
+
+    userService.getById(user.id)
+      .then(profile => {
+        if (isCurrent) {
+          setProfileProjects(profile.projects || [])
+        }
+      })
+      .catch(error => {
+        console.error('Failed to fetch profile projects:', error)
+        if (isCurrent) {
+          setProjectsError('Projektien lataaminen epäonnistui.')
+        }
+      })
+
+    return () => {
+      isCurrent = false
+    }
+  }, [user?.id])
 
   if (!user) {
     return (
@@ -93,14 +123,14 @@ const ProfilePage = ({ user, onUserUpdate }) => {
     try {
       const updatedUser = await userService.update(user.id, { links })
       onUserUpdate(loginService.updateLoggedInUser(updatedUser))
-      setSuccessMessage('Linkit tallennettu.')
+      setSuccessMessage('Links saved.')
       setIsEditing(false)
     } catch (error) {
       console.error('Failed to update profile links:', error)
       setErrorMessage(
         error.response?.status === 401 || error.response?.status === 403
-          ? 'Kirjautuminen on vanhentunut. Kirjaudu uudelleen sisään.'
-          : 'Linkkien tallennus epäonnistui.'
+          ? 'Login expired, login again.'
+          : 'Saving links failed.'
       )
     } finally {
       setIsSaving(false)
@@ -115,48 +145,65 @@ const ProfilePage = ({ user, onUserUpdate }) => {
       ? projects
       : [...projects, createdProject.id]
 
+    setProfileProjects(currentProjects => (
+      currentProjects.some(project =>
+        (typeof project === 'string' ? project : project.id) === createdProject.id
+      )
+        ? currentProjects
+        : [...currentProjects, createdProject]
+    ))
     onUserUpdate(loginService.updateLoggedInUser({ projects: updatedProjects }))
   }
-  console.log(user.projects)
+
   return (
     <div>
       <h2>Profile</h2>
       <dl>
         <button onClick={() => setIsCreating(!isCreating)}>Create a new project</button>
         {isCreating && <ProjectForm onProjectCreated={handleProjectCreated} />}
-        <dt>Käyttäjätunnus</dt>
+        <dt>Username</dt>
         <dd>{user.username}</dd>
-        <dt>Rooli</dt>
+        <dt>Role</dt>
         <dd>{user.role || 'normal'}</dd>
         {user.country && (
           <>
-            <dt>Maa</dt>
+            <dt>Country</dt>
             <dd>{user.country}</dd>
           </>
         )}
-        {user.projects && (
+        {(Array.isArray(user.projects) || profileProjects.length > 0) && (
           <>
-            <dt>Projektit</dt>
-            <dd>{user.projects.length}</dd>
-                <ul>
-                {user.projects.map((project) => <li>{project}</li>)}
-              </ul>
+            <dt>Projects</dt>
+            <dd>{profileProjects.length}</dd>
+            <ul>
+              {profileProjects.map(project => {
+                const projectId = typeof project === 'string' ? project : project.id
+                const projectTitle = typeof project === 'string' ? null : project.title
+                return (
+                  <li key={projectId}>
+                    {projectTitle}
+                  </li>
+                )
+              })}
+            </ul>
           </>
         )}
+        {projectsError && <p role="alert">{projectsError}</p>}
       </dl>
-      <button type="button" onClick={() => setIsEditing(true)} hidden={isEditing}>
-        Edit
-      </button>
+
       {Object.keys(links).length > 0 && (
         <section>
-          <h3>Linkit</h3>
+          <h3>Links (github, instagram...)</h3>
+          <button type="button" onClick={() => setIsEditing(true)} hidden={isEditing}>
+          Edit
+        </button>
           <ul>
             {Object.entries(links).map(([name, link]) => {
               const href = typeof link === 'string' ? getLinkHref(link) : null
               return (
-                <li key={name}>
+                <li className='link' key={name}>
                   {href ? (
-                    <a href={href} target="_blank" rel="noreferrer">
+                    <a className="link" href={href} target="_blank" rel="noreferrer">
                       {name}
                     </a>
                   ) : (
@@ -165,7 +212,7 @@ const ProfilePage = ({ user, onUserUpdate }) => {
                   {' '}
                   {isEditing && (
                     <button type="button" onClick={() => handleRemoveLink(name)}>
-                      Poista
+                      Delete
                     </button>
                   )}
                 </li>
@@ -175,10 +222,10 @@ const ProfilePage = ({ user, onUserUpdate }) => {
         </section>
       )}
       {isEditing && <section>
-        <h3>Lisää linkki</h3>
+        <h3>Add link</h3>
         <form onSubmit={handleAddLink}>
           <div>
-            <label htmlFor="link-name">Palvelun nimi</label>
+            <label htmlFor="link-name">Name</label>
             <input
               id="link-name"
               value={linkName}
@@ -187,7 +234,7 @@ const ProfilePage = ({ user, onUserUpdate }) => {
             />
           </div>
           <div>
-            <label htmlFor="link-url">Linkki</label>
+            <label htmlFor="link-url">Link</label>
             <input
               id="link-url"
               type="url"
@@ -197,13 +244,13 @@ const ProfilePage = ({ user, onUserUpdate }) => {
               required
             />
           </div>
-          <button type="submit">Lisää listaan</button>
+          <button type="submit">Add to list</button>
         </form>
         <button type="button" onClick={handleSaveLinks} disabled={isSaving}>
-          {isSaving ? 'Tallennetaan...' : 'Tallenna linkit'}
+          {isSaving ? 'Saving...' : 'Save links'}
         </button>
         <button type="button" onClick={handleCancelEdit} disabled={isSaving}>
-          Peruuta
+          Cancel
         </button>
         {errorMessage && <p role="alert">{errorMessage}</p>}
         {successMessage && <p role="status">{successMessage}</p>}

@@ -10,7 +10,7 @@ usersRouter.get('/', async (request, response) => {
   response.json(users)
 })
 usersRouter.get('/:id', (request, response, next)=> {
-    User.findById(request.params.id).then((user)=> {
+    User.findById(request.params.id).populate('projects', { title: 1, type: 1 }).then((user)=> {
     response.json(user)
   })
   .catch(error=>next(error))
